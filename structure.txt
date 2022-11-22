@@ -1,0 +1,27 @@
+structure
+
+
+
+
+
+
+Classes:
+
+
+Game
+    Keeps track of score
+    Keeps track of table (dimensions, goal dim, and friction)
+    Determines collisions and manually updates objects
+        Check wall collisions for all, (puck can enter goal and striker can't leave it's zone)
+        Wall collision is easy, invert respective speed and move puck
+        
+
+    On reset it places strikers back in position and randomly gives puck a speed
+
+Player
+    Has input to affect an object (one of the pieces that's not the puck)
+
+
+Object
+    Is either puck or striker
+    has radius and location/speed
