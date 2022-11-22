@@ -36,6 +36,8 @@ class Object():
         
     def reset(self):
 
+        pass
+
 
 
 class Player():
@@ -68,24 +70,34 @@ class Game():
         self.objects = [Object(0,(self.height-self.strickersize)*(2*i-1),self.strikersize) for i in range(2)] + [Object(0,0,self.pucksize)]
 
 
-    def move(self,action):
+    def step(self,action):
 
-        for player in self.players:
+        for obj in self.objects:
 
-            player.accelerate(self.friction,action)
-
-    def check_collision(self):
-
-        for player in self.players:
+            obj.accelerate(self.friction,action)
+            obj.move()
 
 
-    def step(self):
 
-        for player in self.players:
+    def handle_collision(self):
 
-            player.move()
+        for obj in self.objects:
 
-        self.puck.move()
+            if obj.x<=-1*self.width:
+                obj.vx *= -1
+                obj.x += -1*(obj.x+self.width)
+
+            elif obj.x>=self.width:
+                obj.vx *= -1
+                obj.x += 2*self.width - obj.x
+
+            if obj.y<=-1*self.height:
+                obj.vy *= -1
+                obj.y += -1*(obj.y+self.height)
+
+            elif obj.y>=self.height:
+                obj.vy *= -1
+                obj.y += 2*self.height - obj.y
 
 
 
@@ -100,7 +112,8 @@ class Game():
 
     def play_round(self):
 
-        while not self.over:
+        self.step(None)
+        self.handle_collision()
 
 
 
