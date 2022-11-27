@@ -1,11 +1,4 @@
-
-config = {
-    "height":50
-    ,"width":25
-    ,"friction":-0.1
-    ,"pucksize":3
-    ,"strikersize":5
-}
+import numpy as np
 
 
 
@@ -18,7 +11,7 @@ class Object():
 
         self.x = x
         self.y = y
-        self.radius
+        self.radius = radius
         self.vx = 0
         self.vy = 0
 
@@ -32,11 +25,44 @@ class Object():
         self.x += self.vx
         self.y += self.vy
 
-
-        
     def reset(self):
 
         pass
+
+
+class Puck(Object):
+
+    def __init__(self):
+        super().__init__(0,0,10)
+
+        self.type = 0
+        self.vx = np.random.uniform(-10,10)
+        self.vy = np.random.uniform(-10,10)
+
+
+    def reset(self):
+
+        self.x = 0
+        self.y = 0
+        self.vx = np.random.uniform(-10,10)
+        self.vy = np.random.uniform(-10,10)
+
+
+class Striker(Object):
+
+    def __init__(self,x,y):
+        super().__init__(x,y,15)
+
+        self.type = 1
+        self.xi = x
+        self.yi = y
+
+    def reset(self):
+
+        self.x = self.xi
+        self.y = self.yi
+        self.vx = 0
+        self.vy = 0
 
 
 
@@ -48,26 +74,30 @@ class Player():
     
     def __repr__(self):
 
-        return name.title()
+        return self.name.title()
+
+
+
 
 
 
 class Game():
 
-    def __init__(self,config):
+    def __init__(self):
 
-        self.height = height
-        self.width = width
-        self.friction = friction
-        self.pucksize = pucksize
-        self.strikersize = strikersize
+        self.height = 300
+        self.width = 200
+        self.friction = -0.1
+        self.pucksize = 3
+        self.strikersize = 15
 
 
         self.over = False
-        self.players = 
+        self.score = [0,0]
         self.puck = Object(0,0,3)
         self.players = [Player(f'Player {i}') for i in range(2)]
-        self.objects = [Object(0,(self.height-self.strickersize)*(2*i-1),self.strikersize) for i in range(2)] + [Object(0,0,self.pucksize)]
+        self.objects = [Striker(0,(self.height-(3*self.strikersize))*(2*i-1)) for i in range(2)] + [Puck()]
+
 
 
     def step(self,action):
@@ -77,27 +107,35 @@ class Game():
             obj.accelerate(self.friction,action)
             obj.move()
 
+        self.handle_collision()
+
 
 
     def handle_collision(self):
 
+        print(self.objects[-1].x,self.objects[-1].vx,self.objects[-1].y,self.objects[-1].vy)
+
         for obj in self.objects:
 
-            if obj.x<=-1*self.width:
+            if obj.x<=-1*self.width + obj.radius:
                 obj.vx *= -1
-                obj.x += -1*(obj.x+self.width)
+                obj.x += -1*(obj.x + self.width - obj.radius)
 
-            elif obj.x>=self.width:
+            elif obj.x>=self.width - obj.radius:
                 obj.vx *= -1
-                obj.x += 2*self.width - obj.x
+                obj.x += 2*(self.width - obj.radius - obj.x)
 
-            if obj.y<=-1*self.height:
-                obj.vy *= -1
-                obj.y += -1*(obj.y+self.height)
 
-            elif obj.y>=self.height:
+
+            if obj.y<=-1*self.height + obj.radius:
                 obj.vy *= -1
-                obj.y += 2*self.height - obj.y
+                obj.y += -1*(obj.y + self.height - obj.radius)
+
+
+            elif obj.y>=self.height - obj.radius:
+                obj.vy *= -1
+                obj.y += 2*(self.height - obj.radius - obj.y)
+
 
 
 
@@ -105,10 +143,8 @@ class Game():
     def reset(self):
 
         self.over = False
+        self.score = [0,0]
 
-        for player in self.players:
-
-            player.reset()
 
     def play_round(self):
 
